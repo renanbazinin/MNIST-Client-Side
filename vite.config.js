@@ -5,18 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/MNIST-Client-Side/', // Added for GitHub Pages deployment
   plugins: [react()],
-  optimizeDeps: {
-    exclude: ['onnxruntime-web'] // Exclude onnxruntime-web from optimization
-  },
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp'
-    }
-  },
-  build: {
-    rollupOptions: {
-      external: ['onnxruntime-web'] // Treat onnxruntime-web as external
     }
   }
 })

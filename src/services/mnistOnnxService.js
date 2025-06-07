@@ -1,8 +1,19 @@
-import * as ort from 'onnxruntime-web';
+// Global ort is loaded via UMD script in index.html
+// import * as ort from 'onnxruntime-web'; // Removed ES module import
+
+const getOrt = () => {
+  // Access the global ort object loaded by UMD script
+  if (typeof window !== 'undefined' && window.ort) {
+    return window.ort;
+  }
+  throw new Error("ONNX Runtime not found. Ensure ort.min.js is loaded via script tag.");
+};
 
 const setWasmPaths = () => {
-  // Log the imported 'ort' object to help diagnose its structure, especially in the remote environment.
-  console.log("Inspecting 'ort' object immediately after import:", ort);
+  const ort = getOrt();
+  
+  // Log the ort object to help diagnose its structure
+  console.log("Inspecting global 'ort' object:", ort);
 
   if (typeof ort === 'undefined' || ort === null) {
     console.error("'ort' (ONNX Runtime) object is undefined or null. Cannot set WASM paths.");
@@ -10,12 +21,12 @@ const setWasmPaths = () => {
   }
 
   if (typeof ort.env === 'undefined' || ort.env === null) {
-    console.error("'ort.env' is undefined or null. This is required for WASM configuration. The 'ort' object received was:", JSON.stringify(ort));
+    console.error("'ort.env' is undefined or null. This is required for WASM configuration. The 'ort' object received was:", ort);
     throw new Error("'ort.env' is undefined. Cannot configure WASM paths. Check library initialization.");
   }
 
   if (typeof ort.env.wasm === 'undefined' || ort.env.wasm === null) {
-    console.error("'ort.env.wasm' is undefined or null. This is critical for WASM setup. 'ort.env' received was:", JSON.stringify(ort.env));
+    console.error("'ort.env.wasm' is undefined or null. This is critical for WASM setup. 'ort.env' received was:", ort.env);
     throw new Error("'ort.env.wasm' is undefined. Cannot configure WASM paths.");
   }
 
@@ -134,6 +145,7 @@ export const initializeMnistModel = async () => {
       graphOptimizationLevel: 'all' // Or 'extended', 'basic'
     };
 
+    const ort = getOrt();
     const session = await ort.InferenceSession.create(modelUri, options);
     console.log('MNIST ONNX model loaded successfully.');
     URL.revokeObjectURL(modelUri); // Clean up the blob URL after loading
@@ -161,6 +173,7 @@ export const runMnistPrediction = async (session, preprocessedInput) => {
   }
 
   try {
+    const ort = getOrt();
     // Ensure preprocessedInput is a Float32Array
     const inputTensor = new ort.Tensor('float32', preprocessedInput, [1, 784]);
     const feeds = { [session.inputNames[0]]: inputTensor };
