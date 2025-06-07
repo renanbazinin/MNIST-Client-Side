@@ -18,6 +18,9 @@ function App() {
   const [modelStatus, setModelStatus] = useState('loading'); // 'loading', 'loaded', 'failed'
   const [autoPredictTimer, setAutoPredictTimer] = useState(null);
   const [hasDrawnContent, setHasDrawnContent] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('model.onnx'); // Default model
+  const [showInitialLoadMessage, setShowInitialLoadMessage] = useState(false);
+  const isInitialLoadCycleRef = useRef(true); // Tracks if we are in the initial model load cycle
 
   // Initialize canvas
   useEffect(() => {
@@ -45,30 +48,41 @@ function App() {
   // Load ONNX model
   useEffect(() => {
     const loadModel = async () => {
+      let currentLoadIsPartOfInitialCycle = false;
+      if (isInitialLoadCycleRef.current) {
+        setShowInitialLoadMessage(true);
+        currentLoadIsPartOfInitialCycle = true;
+      }
+      setModelStatus('loading');
+      setModelError(null); // Clear previous errors
+
       try {
-        setModelError(null); // Clear previous errors
-        setModelStatus('loading'); // Set status to loading
-        console.log("App.jsx: Attempting to initialize MNIST ONNX model...");
-        const newSession = await initializeMnistModel();
+        console.log(`App.jsx: Attempting to initialize MNIST ONNX model (${selectedModel})...`);
+        const newSession = await initializeMnistModel(selectedModel);
         setSession(newSession);
         if (newSession) {
           console.debug('App.jsx: MNIST ONNX session inputs:', newSession.inputNames);
           console.debug('App.jsx: MNIST ONNX session outputs:', newSession.outputNames);
           console.log("App.jsx: MNIST ONNX model session initialized and set in state.");
-          setModelStatus('loaded'); // Set status to loaded
+          setModelStatus('loaded');
         } else {
           console.warn('App.jsx: initializeMnistModel returned null or undefined session');
           setModelError('Failed to initialize model session. Session is null.');
-          setModelStatus('failed'); // Set status to failed
+          setModelStatus('failed');
         }
       } catch (err) {
-        console.error('App.jsx: Failed to load MNIST ONNX model', err);
-        setModelError(`Failed to load model: ${err.message}`);
-        setModelStatus('failed'); // Set status to failed
+        console.error(`App.jsx: Failed to load MNIST ONNX model (${selectedModel})`, err);
+        setModelError(`Failed to load model ${selectedModel}: ${err.message}`);
+        setModelStatus('failed');
+      } finally {
+        if (currentLoadIsPartOfInitialCycle) {
+          setShowInitialLoadMessage(false); // Hide the initial load message
+          isInitialLoadCycleRef.current = false; // Mark the initial load cycle as complete
+        }
       }
     };
     loadModel();
-  }, []);
+  }, [selectedModel]);
 
   // Auto-predict helper function
   const startAutoPredictTimer = useCallback(() => {
@@ -447,6 +461,22 @@ function App() {
             <span className="gradient-text">MNIST</span> Digit Recognition
           </h1>
           <p className="subtitle">Draw a digit and let AI predict what you wrote!</p>
+          <div className="model-selector">
+            <label htmlFor="model-select">Choose Model: </label>
+            <select 
+              id="model-select" 
+              value={selectedModel} 
+              onChange={(e) => setSelectedModel(e.target.value)}
+            >
+              <option value="model.onnx">Standard Model</option>
+              <option value="lightModel.onnx">Light Model</option>
+            </select>
+          </div>
+          {showInitialLoadMessage && (
+            <div className="initial-load-notification">
+              Initializing AI model for the first time. This may take up to 20 seconds. Please wait...
+            </div>
+          )}
         </header>
 
         <main className="main">

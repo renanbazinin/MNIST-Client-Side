@@ -131,13 +131,13 @@ const getMnistModelUri = async (modelFilename = 'model.onnx') => {
   return null; 
 };
 
-export const initializeMnistModel = async () => {
+export const initializeMnistModel = async (modelFilename = 'model.onnx', retries = 2, delay = 1000) => {
   setWasmPaths(); // Call this first to ensure paths are set before any ORT operation.
   try {
-    console.log("Initializing MNIST ONNX model...");
-    const modelUri = await getMnistModelUri('model.onnx');
+    console.log(`Initializing MNIST ONNX model (${modelFilename})...`);
+    const modelUri = await getMnistModelUri(modelFilename);
     if (!modelUri) {
-      throw new Error("Failed to get model URI for model.onnx. Ensure model.onnx is in public/models/ folder.");
+      throw new Error(`Failed to get model URI for ${modelFilename}. Ensure ${modelFilename} is in public/models/ folder.`);
     }
 
     const options = {
@@ -147,18 +147,25 @@ export const initializeMnistModel = async () => {
 
     const ort = getOrt();
     const session = await ort.InferenceSession.create(modelUri, options);
-    console.log('MNIST ONNX model loaded successfully.');
+    console.log(`MNIST ONNX model (${modelFilename}) loaded successfully.`);
     URL.revokeObjectURL(modelUri); // Clean up the blob URL after loading
 
-    console.log("MNIST ONNX Session Input Names:", session.inputNames);
-    console.log("MNIST ONNX Session Output Names:", session.outputNames);
+    console.log(`MNIST ONNX Session (${modelFilename}) Input Names:`, session.inputNames);
+    console.log(`MNIST ONNX Session (${modelFilename}) Output Names:`, session.outputNames);
     
     return session; // Return the session
 
   } catch (error) {
-    console.error('Failed to initialize MNIST ONNX model:', error);
-    // Propagate the error so the UI can be updated if needed
-    throw error;
+    console.error(`Failed to initialize MNIST ONNX model (${modelFilename}) on this attempt:`, error);
+    if (retries > 0) {
+      console.log(`Retrying model initialization for ${modelFilename} in ${delay / 1000}s... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      // Recursively call with one less retry and potentially increased delay (optional: delay * 2 for exponential backoff)
+      return initializeMnistModel(modelFilename, retries - 1, delay); 
+    } else {
+      console.error(`All retries failed for initializing model ${modelFilename}.`);
+      throw error; // Propagate the error after all retries are exhausted
+    }
   }
 };
 

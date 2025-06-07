@@ -398,6 +398,60 @@ html, body {
   }
 }
 
+/* Model Selector Styles */
+.model-selector {
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #f0f0f0; /* Light text for dark background */
+}
+
+.model-selector label {
+  font-weight: 500;
+}
+
+.model-selector select {
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #555; /* Darker border */
+  background-color: #444; /* Dark background for select */
+  color: #f0f0f0; /* Light text for select */
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.model-selector select:hover {
+  border-color: #777;
+}
+
+.model-selector select:focus {
+  outline: none;
+  border-color: #667eea; /* Highlight color */
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+/* Initial Load Notification Styles */
+.initial-load-notification {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 230, 153, 0.1); /* Light yellow, slightly transparent */
+  border: 1px solid rgba(255, 204, 51, 0.5); /* Orange-yellow border */
+  color: #fff5cc; /* Light yellow text */
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Prediction Result */
 .prediction-result {
   margin-top: 1rem;
