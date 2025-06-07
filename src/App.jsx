@@ -155,22 +155,79 @@ function App() {
   };
 
   const preprocessCanvas = () => {
-    const canvas = canvasRef.current;
-    // const ctx = canvas.getContext('2d'); // Not needed for getImageData after drawing
+    const sourceCanvas = canvasRef.current;
     
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = 28;
-    tempCanvas.height = 28;
+    const finalProcessedCanvas = document.createElement('canvas');
+    const finalProcessedCtx = finalProcessedCanvas.getContext('2d');
+    finalProcessedCanvas.width = 28;
+    finalProcessedCanvas.height = 28;
+    finalProcessedCtx.imageSmoothingEnabled = false;
+    finalProcessedCtx.fillStyle = 'black'; // Ensure background of 28x28 canvas is black
+    finalProcessedCtx.fillRect(0, 0, 28, 28);
+
+    // 1. Get ImageData from the source 280x280 canvas
+    const sourceCtx = sourceCanvas.getContext('2d');
+    const sourceImageData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+    const sourceData = sourceImageData.data;
+
+    // 2. Find bounding box of the drawn content
+    let minX = sourceCanvas.width;
+    let minY = sourceCanvas.height;
+    let maxX = -1;
+    let maxY = -1;
+    const threshold = 15; // Pixel intensity threshold (0-255) to be considered part of the digit
+
+    for (let y = 0; y < sourceCanvas.height; y++) {
+      for (let x = 0; x < sourceCanvas.width; x++) {
+        const i = (y * sourceCanvas.width + x) * 4;
+        // We draw with white/transparent gradients on a black background.
+        // The R, G, B values will be similar for grayscale parts of the drawing.
+        // Alpha (sourceData[i+3]) is also important. If alpha is 0, it's transparent.
+        // A simple intensity check on RGB is fine if alpha is high enough.
+        // Consider (r+g+b)/3 > threshold AND alpha > threshold_alpha if needed.
+        const intensity = (sourceData[i] + sourceData[i+1] + sourceData[i+2]) / 3;
+        const alpha = sourceData[i+3];
+
+        if (intensity > threshold && alpha > 128) { // Check intensity and ensure it's not too transparent
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+
+    // 3. If drawing found, process it; otherwise, finalProcessedCanvas remains black
+    if (maxX >= minX && maxY >= minY) {
+      const contentWidth = maxX - minX + 1;
+      const contentHeight = maxY - minY + 1;
+
+      // Create a temporary canvas for the cropped digit from source
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = contentWidth;
+      cropCanvas.height = contentHeight;
+      const cropCtx = cropCanvas.getContext('2d');
+      // Draw the bounded part of the source canvas to the cropCanvas
+      cropCtx.drawImage(sourceCanvas, minX, minY, contentWidth, contentHeight, 0, 0, contentWidth, contentHeight);
+
+      // Define the target size for the digit within the 28x28 grid (e.g., 20x20 or 22x22)
+      const targetDigitBoxSize = 20; // MNIST digits are often around this size in a 28x28 box
+      const targetPadding = (28 - targetDigitBoxSize) / 2; // e.g., (28-20)/2 = 4 pixels padding
+
+      // Scale the cropped image (cropCanvas) to fit into targetDigitBoxSize, preserving aspect ratio
+      const scaleFactor = Math.min(targetDigitBoxSize / contentWidth, targetDigitBoxSize / contentHeight);
+      const scaledWidth = contentWidth * scaleFactor;
+      const scaledHeight = contentHeight * scaleFactor;
+
+      // Calculate destination x, y on the 28x28 finalProcessedCanvas to center the scaled digit
+      const destXOnFinal = targetPadding + (targetDigitBoxSize - scaledWidth) / 2;
+      const destYOnFinal = targetPadding + (targetDigitBoxSize - scaledHeight) / 2;
+      
+      // Draw the scaled digit onto the 28x28 finalProcessedCanvas
+      finalProcessedCtx.drawImage(cropCanvas, 0, 0, contentWidth, contentHeight, destXOnFinal, destYOnFinal, scaledWidth, scaledHeight);
+    }
     
-    // Disable image smoothing to get sharper pixels when downscaling
-    tempCtx.imageSmoothingEnabled = false; 
-    
-    // The main canvas has a black background. We draw with white gradients (fading to transparent).
-    // When drawImage transfers this to the tempCanvas, the transparency against black becomes shades of gray.
-    tempCtx.drawImage(canvas, 0, 0, 28, 28); // Downscales original to 28x28
-    
-    const smallImageData = tempCtx.getImageData(0, 0, 28, 28);
+    const smallImageData = finalProcessedCtx.getImageData(0, 0, 28, 28);
     const data = smallImageData.data;
     
     const vector = [];
