@@ -15,6 +15,7 @@ function App() {
   const [top4Predictions, setTop4Predictions] = useState([]); // State for top 4 predictions
   const [session, setSession] = useState(null);
   const [modelError, setModelError] = useState(null); // For displaying model loading errors
+  const [modelStatus, setModelStatus] = useState('loading'); // 'loading', 'loaded', 'failed'
 
   // Initialize canvas
   useEffect(() => {
@@ -44,6 +45,7 @@ function App() {
     const loadModel = async () => {
       try {
         setModelError(null); // Clear previous errors
+        setModelStatus('loading'); // Set status to loading
         console.log("App.jsx: Attempting to initialize MNIST ONNX model...");
         const newSession = await initializeMnistModel();
         setSession(newSession);
@@ -51,13 +53,16 @@ function App() {
           console.debug('App.jsx: MNIST ONNX session inputs:', newSession.inputNames);
           console.debug('App.jsx: MNIST ONNX session outputs:', newSession.outputNames);
           console.log("App.jsx: MNIST ONNX model session initialized and set in state.");
+          setModelStatus('loaded'); // Set status to loaded
         } else {
           console.warn('App.jsx: initializeMnistModel returned null or undefined session');
           setModelError('Failed to initialize model session. Session is null.');
+          setModelStatus('failed'); // Set status to failed
         }
       } catch (err) {
         console.error('App.jsx: Failed to load MNIST ONNX model', err);
         setModelError(`Failed to load model: ${err.message}`);
+        setModelStatus('failed'); // Set status to failed
       }
     };
     loadModel();
@@ -379,6 +384,14 @@ function App() {
                 <span className="btn-icon">🗑️</span>
                 Clear
               </button>
+              <div className={`model-status-indicator ${modelStatus}`}>
+                <span className="status-dot"></span>
+                <span className="status-text">
+                  {modelStatus === 'loading' && 'Loading Model'}
+                  {modelStatus === 'loaded' && 'Model Ready'}
+                  {modelStatus === 'failed' && 'Model Failed'}
+                </span>
+              </div>
             </div>
 
             {modelError && (
