@@ -23,12 +23,19 @@ function App() {
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.lineCap = 'round'; // Good for connecting segments if we were stroking
-      ctx.lineJoin = 'round'; // Good for connecting segments if we were stroking
-      // ctx.strokeStyle = 'white'; // No longer using a simple strokeStyle
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       
+      // Adjust line width based on screen size for better mobile experience
       const isMobile = window.innerWidth <= 768;
-      ctx.lineWidth = isMobile ? 28 : 22; // Increased for "fat finger" effect
+      const isSmallMobile = window.innerWidth <= 480;
+      if (isSmallMobile) {
+        ctx.lineWidth = 32; // Larger for very small screens
+      } else if (isMobile) {
+        ctx.lineWidth = 28; // Increased for mobile touch
+      } else {
+        ctx.lineWidth = 22; // Default for desktop
+      }
     }
   }, []);
 
@@ -58,16 +65,24 @@ function App() {
 
   const getCoordinates = (e) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 }; // Guard against null canvas
+    if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     
-    if (e.touches) {
-      // Touch event
+    if (e.touches && e.touches.length > 0) {
+      // Touch event - use the first touch point
+      const touch = e.touches[0];
       return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY
+        x: (touch.clientX - rect.left) * scaleX,
+        y: (touch.clientY - rect.top) * scaleY
+      };
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      // Touch end event - use the first changed touch
+      const touch = e.changedTouches[0];
+      return {
+        x: (touch.clientX - rect.left) * scaleX,
+        y: (touch.clientY - rect.top) * scaleY
       };
     } else {
       // Mouse event
@@ -113,9 +128,14 @@ function App() {
     const currentLineWidth = parseFloat(ctx.lineWidth);
 
     setIsDrawing(true);
+    
+    // Prevent scrolling on mobile while drawing
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
     const coords = getCoordinates(e);
     setLastPosition(coords);
-    drawFatPoint(coords.x, coords.y, ctx, currentLineWidth); // Draw initial point
+    drawFatPoint(coords.x, coords.y, ctx, currentLineWidth);
   }, [getCoordinates, drawFatPoint]);
 
   const draw = useCallback((e) => {
@@ -141,7 +161,11 @@ function App() {
   const stopDrawing = useCallback((e) => {
     e.preventDefault();
     setIsDrawing(false);
-    setLastPosition(null); // Reset last position
+    setLastPosition(null);
+    
+    // Re-enable scrolling on mobile
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }, []);
 
   const clearCanvas = () => {

@@ -1,24 +1,56 @@
 import * as ort from 'onnxruntime-web';
 
 const setWasmPaths = () => {
+  // Log the imported 'ort' object to help diagnose its structure, especially in the remote environment.
+  console.log("Inspecting 'ort' object immediately after import:", ort);
+
+  if (typeof ort === 'undefined' || ort === null) {
+    console.error("'ort' (ONNX Runtime) object is undefined or null. Cannot set WASM paths.");
+    throw new Error("'ort' (ONNX Runtime) object is undefined or null. Ensure onnxruntime-web is loaded correctly.");
+  }
+
+  if (typeof ort.env === 'undefined' || ort.env === null) {
+    console.error("'ort.env' is undefined or null. This is required for WASM configuration. The 'ort' object received was:", JSON.stringify(ort));
+    throw new Error("'ort.env' is undefined. Cannot configure WASM paths. Check library initialization.");
+  }
+
+  if (typeof ort.env.wasm === 'undefined' || ort.env.wasm === null) {
+    console.error("'ort.env.wasm' is undefined or null. This is critical for WASM setup. 'ort.env' received was:", JSON.stringify(ort.env));
+    throw new Error("'ort.env.wasm' is undefined. Cannot configure WASM paths.");
+  }
+
   // Vite provides `import.meta.env.BASE_URL` which will be '/' for dev and '/REPO_NAME/' for production build
   const base = import.meta.env.BASE_URL || '/';
   
   // Ensure the base path ends with a slash if it's not just "/"
   const publicPath = base.endsWith('/') ? base : `${base}/`;
 
-  const wasmPaths = {
-    'ort-wasm.wasm': `${publicPath}ort-wasm.wasm`,
-    'ort-wasm-simd.wasm': `${publicPath}ort-wasm-simd.wasm`,
-    'ort-wasm-threaded.wasm': `${publicPath}ort-wasm-threaded.wasm`,
-    'ort-wasm-simd-threaded.wasm': `${publicPath}ort-wasm-simd-threaded.wasm`
-  };
+  // Define the expected WASM file names.
+  // IMPORTANT: If you set `ort.env.wasm.prefix` to your own `publicPath`,
+  // you MUST copy these WASM files from `node_modules/onnxruntime-web/dist/`
+  // into your project's `public/` folder. Vite will then copy them to your build output directory.
+  // Otherwise, ONNX Runtime will fail to load them.
+  const wasmFileNames = [
+    'ort-wasm.wasm',
+    'ort-wasm-simd.wasm',
+    'ort-wasm-threaded.wasm',
+    'ort-wasm-simd-threaded.wasm'
+    // Check the specific version of onnxruntime-web you are using for the exact list of WASM files.
+    // Some versions might also include '.jsep' files for threaded WASM.
+  ];
+
+  const wasmPaths = {};
+  wasmFileNames.forEach(fileName => {
+    wasmPaths[fileName] = `${publicPath}${fileName}`;
+  });
+  
   ort.env.wasm.wasmPaths = wasmPaths;
-  // Set the prefix as well, as ORT Web might use it to locate other WASM related files or workers
+  // Setting `prefix` tells ONNX Runtime to look for the WASM files at this specific path.
   ort.env.wasm.prefix = publicPath;
 
-  console.log('ONNX Runtime Web WASM Paths set to:', wasmPaths);
+  console.log('ONNX Runtime Web WASM Paths set to:', ort.env.wasm.wasmPaths);
   console.log('ONNX Runtime Web WASM Prefix set to:', ort.env.wasm.prefix);
+  console.log(`Reminder: Ensure WASM files (e.g., ort-wasm.wasm) are present in your deployment at '${publicPath}'. If not, copy them from 'node_modules/onnxruntime-web/dist/' to your 'public/' folder before building.`);
 };
 
 // Reusable function to fetch the model
