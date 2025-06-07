@@ -316,66 +316,85 @@ html, body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 12px;
   font-size: 0.9rem;
-  font-weight: 500;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  min-height: 48px;
+  font-weight: 600;
+  min-width: 140px;
   justify-content: center;
-  flex-shrink: 0;
+  transition: all 0.3s ease;
+  cursor: default;
+  user-select: none;
 }
 
+/* Status dot indicator */
 .status-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   transition: all 0.3s ease;
+  position: relative;
 }
 
-/* Loading status - Orange */
+/* Loading state - Orange with pulsing animation */
 .model-status-indicator.loading {
-  background: linear-gradient(135deg, #ffa726, #ff9800);
+  background: linear-gradient(135deg, #ff9f43, #ffa726);
   color: white;
-  border-color: #ff9800;
+  box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
 }
 
 .model-status-indicator.loading .status-dot {
   background: #fff;
-  animation: pulse 2s infinite;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Loaded status - Green */
+/* Loaded state - Green */
 .model-status-indicator.loaded {
-  background: linear-gradient(135deg, #66bb6a, #4caf50);
+  background: linear-gradient(135deg, #2ed573, #1dd1a1);
   color: white;
-  border-color: #4caf50;
+  box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3);
 }
 
 .model-status-indicator.loaded .status-dot {
   background: #fff;
 }
 
-/* Failed status - Red */
+/* Failed state - Red */
 .model-status-indicator.failed {
-  background: linear-gradient(135deg, #ef5350, #f44336);
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
   color: white;
-  border-color: #f44336;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
 .model-status-indicator.failed .status-dot {
   background: #fff;
 }
 
+/* Auto-predict active indicator */
+.model-status-indicator.auto-predict-active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.model-status-indicator.auto-predict-active .status-dot {
+  background: #fff;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Pulse animation for loading and auto-predict states */
 @keyframes pulse {
-  0%, 100% {
+  0% {
     opacity: 1;
     transform: scale(1);
   }
   50% {
     opacity: 0.7;
     transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

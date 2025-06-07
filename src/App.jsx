@@ -16,6 +16,8 @@ function App() {
   const [session, setSession] = useState(null);
   const [modelError, setModelError] = useState(null); // For displaying model loading errors
   const [modelStatus, setModelStatus] = useState('loading'); // 'loading', 'loaded', 'failed'
+  const [autoPredictTimer, setAutoPredictTimer] = useState(null);
+  const [hasDrawnContent, setHasDrawnContent] = useState(false);
 
   // Initialize canvas
   useEffect(() => {
@@ -67,6 +69,76 @@ function App() {
     };
     loadModel();
   }, []);
+
+  // Auto-predict helper function
+  const startAutoPredictTimer = useCallback(() => {
+    // Clear any existing timer
+    if (autoPredictTimer) {
+      clearTimeout(autoPredictTimer);
+    }
+    
+    // Only start timer if we have drawn content and model is loaded
+    if (hasDrawnContent && session && modelStatus === 'loaded') {
+      const timer = setTimeout(async () => {
+        console.log('Auto-predict triggered after 0.5s of inactivity');
+        
+        // Clear the timer reference
+        setAutoPredictTimer(null);
+        
+        // Run prediction logic directly to avoid circular dependency
+        setModelError(null);
+        const imageVector = preprocessCanvas();
+        const inputFloat32Array = Float32Array.from(imageVector);
+
+        try {
+          console.log("App.jsx: Running auto-prediction with input tensor:", inputFloat32Array);
+          const outputProbabilities = await runMnistPrediction(session, inputFloat32Array);
+          console.log("App.jsx: Raw ONNX softmax output:", outputProbabilities);
+
+          if (!outputProbabilities || outputProbabilities.length === 0) {
+            console.error('Error during ONNX inference or no data returned');
+            setModelError('Auto-prediction failed. No output from model.');
+            setTop4Predictions([]);
+            return;
+          }
+
+          const probs = Array.from(outputProbabilities);
+          const indexedProbs = probs.map((prob, index) => ({ digit: index, probability: prob }));
+          indexedProbs.sort((a, b) => b.probability - a.probability);
+          setTop4Predictions(indexedProbs.slice(0, 4));
+
+          const maxProb = indexedProbs[0].probability;
+          const predIndex = indexedProbs[0].digit;
+
+          const newPrediction = {
+            digit: predIndex,
+            confidence: maxProb,
+            timestamp: new Date().toLocaleTimeString(),
+            id: Date.now()
+          };
+
+          setCurrentPrediction(newPrediction);
+          setPredictions(prevPredictions => [newPrediction, ...prevPredictions]);
+
+        } catch (err) {
+          console.error('App.jsx: Error during auto-prediction', err);
+          setModelError(`Auto-prediction failed: ${err.message}`);
+          setTop4Predictions([]);
+        }
+      }, 200); // 0.5 seconds
+      
+      setAutoPredictTimer(timer);
+    }
+  }, [autoPredictTimer, hasDrawnContent, session, modelStatus]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoPredictTimer) {
+        clearTimeout(autoPredictTimer);
+      }
+    };
+  }, [autoPredictTimer]);
 
   const getCoordinates = (e) => {
     const canvas = canvasRef.current;
@@ -133,6 +205,13 @@ function App() {
     const currentLineWidth = parseFloat(ctx.lineWidth);
 
     setIsDrawing(true);
+    setHasDrawnContent(true); // Mark that we have drawn content
+    
+    // Clear any existing auto-predict timer when starting to draw
+    if (autoPredictTimer) {
+      clearTimeout(autoPredictTimer);
+      setAutoPredictTimer(null);
+    }
     
     // Prevent scrolling on mobile while drawing
     document.body.style.overflow = 'hidden';
@@ -141,7 +220,7 @@ function App() {
     const coords = getCoordinates(e);
     setLastPosition(coords);
     drawFatPoint(coords.x, coords.y, ctx, currentLineWidth);
-  }, [getCoordinates, drawFatPoint]);
+  }, [getCoordinates, drawFatPoint, autoPredictTimer]);
 
   const draw = useCallback((e) => {
     e.preventDefault();
@@ -171,7 +250,10 @@ function App() {
     // Re-enable scrolling on mobile
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
-  }, []);
+    
+    // Start auto-predict timer when user stops drawing
+    startAutoPredictTimer();
+  }, [startAutoPredictTimer]);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -181,6 +263,13 @@ function App() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     setCurrentPrediction(null);
+    setHasDrawnContent(false); // Reset drawn content flag
+    
+    // Clear any existing auto-predict timer
+    if (autoPredictTimer) {
+      clearTimeout(autoPredictTimer);
+      setAutoPredictTimer(null);
+    }
   };
 
   const preprocessCanvas = () => {
@@ -277,6 +366,12 @@ function App() {
   };
 
   const predict = useCallback(async () => {
+    // Clear any existing auto-predict timer when manually predicting
+    if (autoPredictTimer) {
+      clearTimeout(autoPredictTimer);
+      setAutoPredictTimer(null);
+    }
+    
     if (!session) {
       console.warn('App.jsx: ONNX session not loaded yet');
       setModelError('Model not loaded. Please wait or try refreshing.');
@@ -322,7 +417,7 @@ function App() {
       setModelError(`Prediction failed: ${err.message}`);
       setTop4Predictions([]); // Clear top 4 predictions on error
     }
-  }, [session]); // Removed preprocessCanvas from dependencies as it's called within
+  }, [session, autoPredictTimer]); // Added autoPredictTimer to dependencies
 
   const undoLastPrediction = () => {
     setPredictions(prev => prev.slice(1));
@@ -384,12 +479,13 @@ function App() {
                 <span className="btn-icon">🗑️</span>
                 Clear
               </button>
-              <div className={`model-status-indicator ${modelStatus}`}>
+              <div className={`model-status-indicator ${modelStatus}${autoPredictTimer ? ' auto-predict-active' : ''}`}>
                 <span className="status-dot"></span>
                 <span className="status-text">
-                  {modelStatus === 'loading' && 'Loading Model'}
-                  {modelStatus === 'loaded' && 'Model Ready'}
-                  {modelStatus === 'failed' && 'Model Failed'}
+                  {autoPredictTimer && 'Auto-predicting...'}
+                  {!autoPredictTimer && modelStatus === 'loading' && 'Loading Model'}
+                  {!autoPredictTimer && modelStatus === 'loaded' && 'Model Ready'}
+                  {!autoPredictTimer && modelStatus === 'failed' && 'Model Failed'}
                 </span>
               </div>
             </div>
