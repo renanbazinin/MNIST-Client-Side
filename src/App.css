@@ -1,3 +1,16 @@
+/* Global box-sizing and overflow fix */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -766,6 +779,8 @@
     border-radius: 12px;
     min-height: calc(100vh - 0.25rem);
     min-height: calc(100dvh - 0.25rem);
+    width: calc(100vw - 0.25rem);
+    max-width: calc(100vw - 0.25rem);
   }
   
   .title {
@@ -779,21 +794,25 @@
   }
   
   .main {
-    padding: 0.75rem 0.5rem;
+    padding: 0.5rem 0.25rem;
     gap: 1.25rem;
   }
   
-  .drawing-canvas {
-    max-width: calc(100vw - 1.5rem);
-    width: calc(100vw - 1.5rem);
-    max-height: calc(100vw - 1.5rem);
-    height: calc(100vw - 1.5rem);
+  .canvas-container {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
     border-radius: 10px;
   }
   
-  .canvas-container {
-    width: calc(100vw - 1.5rem);
+  .drawing-canvas {
+    width: 100%;
+    max-width: 100%;
     border-radius: 10px;
+  }
+  
+  .prediction-result {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
   }
   
   .prediction-digit {
@@ -822,7 +841,7 @@
   }
   
   .predictions-section {
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.5rem;
   }
   
   .prediction-item {
@@ -843,7 +862,7 @@
   }
   
   .info-toggle {
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.5rem;
     font-size: 1.1rem;
   }
   
@@ -858,7 +877,7 @@
   }
   
   .header {
-    padding: 0.75rem 0.5rem 0.5rem;
+    padding: 0.75rem 0.25rem 0.5rem;
   }
 }
 
