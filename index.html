@@ -8,6 +8,13 @@
     <!-- Add this meta description line -->
     <meta name="description" content="A simple web application to recognize handwritten digits (0-9) drawn on a canvas using a client-side ONNX model. Draw a digit and see the AI predict it!" />
     <title>MNIST Digit Recognition</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
