@@ -1,6 +1,7 @@
 {
   "name": "mnist-simple",
   "private": true,
+  "homepage": "https://renanbazinin.github.io/MNIST-Client-Side",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
