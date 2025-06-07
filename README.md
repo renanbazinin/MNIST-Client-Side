@@ -1,6 +1,10 @@
 # MNIST Digit Recognition - Client Side
 
+🔗 **[Live Demo](https://renanbazinin.github.io/MNIST-Client-Side/)**
+
 A simple web application to recognize handwritten digits (0-9) drawn on a canvas using a client-side ONNX model. Draw a digit and let the AI predict it!
+
+*This project is part of an Introduction to Machine Learning course at Tel Aviv Yafo Academic College.*
 
 This project was built with React and Vite.
 
