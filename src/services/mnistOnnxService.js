@@ -1,5 +1,26 @@
 import * as ort from 'onnxruntime-web';
 
+const setWasmPaths = () => {
+  // Vite provides `import.meta.env.BASE_URL` which will be '/' for dev and '/REPO_NAME/' for production build
+  const base = import.meta.env.BASE_URL || '/';
+  
+  // Ensure the base path ends with a slash if it's not just "/"
+  const publicPath = base.endsWith('/') ? base : `${base}/`;
+
+  const wasmPaths = {
+    'ort-wasm.wasm': `${publicPath}ort-wasm.wasm`,
+    'ort-wasm-simd.wasm': `${publicPath}ort-wasm-simd.wasm`,
+    'ort-wasm-threaded.wasm': `${publicPath}ort-wasm-threaded.wasm`,
+    'ort-wasm-simd-threaded.wasm': `${publicPath}ort-wasm-simd-threaded.wasm`
+  };
+  ort.env.wasm.wasmPaths = wasmPaths;
+  // Set the prefix as well, as ORT Web might use it to locate other WASM related files or workers
+  ort.env.wasm.prefix = publicPath;
+
+  console.log('ONNX Runtime Web WASM Paths set to:', wasmPaths);
+  console.log('ONNX Runtime Web WASM Prefix set to:', ort.env.wasm.prefix);
+};
+
 // Reusable function to fetch the model
 const loadOnnxModelFromUrl = async (url) => {
   try {
@@ -73,12 +94,7 @@ const getMnistModelUri = async (modelFilename = 'model.onnx') => {
 };
 
 export const initializeMnistModel = async () => {
-  // Set base path for ONNX runtime WASM files.
-  // Using a CDN is generally robust.
-  ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
-  // Alternatively, if you serve these files locally from your public folder:
-  // ort.env.wasm.wasmPaths = '/ort-wasm-files/'; // Assuming files are in public/ort-wasm-files/
-
+  setWasmPaths(); // Call this first to ensure paths are set before any ORT operation.
   try {
     console.log("Initializing MNIST ONNX model...");
     const modelUri = await getMnistModelUri('model.onnx');
