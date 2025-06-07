@@ -29,11 +29,11 @@ const loadOnnxModelFromUrl = async (url) => {
       method: 'GET',
       headers: {
         'Accept': 'application/octet-stream',
-        'Content-Type': 'application/octet-stream'
+        'Content-Type': 'application/octet-stream' // Note: Content-Type on GET is unusual but kept as is.
       },
-      cache: 'no-cache', // Consider 'default' or 'force-cache' for production
-      mode: 'cors',      // Ensure server allows CORS if fetching from different origin
-      credentials: 'same-origin' // Or 'include' if needed
+      cache: 'default', // Changed from 'no-cache' to 'default' for production
+      mode: 'cors',
+      credentials: 'same-origin'
     });
 
     if (!response.ok) {
@@ -50,47 +50,42 @@ const loadOnnxModelFromUrl = async (url) => {
 
 // Function to get the URI for the MNIST model
 const getMnistModelUri = async (modelFilename = 'model.onnx') => {
-  const baseUrl = window.location.origin;
-  let basePath = window.location.pathname;
-  if (!basePath.endsWith('/')) {
-    basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+  // Vite provides `import.meta.env.BASE_URL` which will be '/' for dev 
+  // and '/REPO_NAME/' for production build (if `base` is set in vite.config.js).
+  const base = import.meta.env.BASE_URL || '/'; 
+  
+  // Ensure the base path ends with a slash
+  const modelPathPrefix = base.endsWith('/') ? base : `${base}/`;
+
+  // Construct the model URL relative to the public path
+  // e.g., if base is '/MNIST-Client-Side/', modelUrl will be '/MNIST-Client-Side/models/model.onnx'
+  // e.g., if base is '/', modelUrl will be '/models/model.onnx'
+  const localModelUrl = `${modelPathPrefix}models/${modelFilename}`;
+  const fallbackModelUrl = 'https://github.com/renanbazinin/MNIST-Client-Side/raw/refs/heads/main/public/models/model.onnx';
+
+  console.log(`Attempting to load ONNX model '${modelFilename}' from constructed local URL: ${localModelUrl}`);
+  let modelBuffer = await loadOnnxModelFromUrl(localModelUrl); 
+
+  if (!modelBuffer) {
+    console.warn(`Failed to load ONNX model from local URL: ${localModelUrl}. Attempting fallback from: ${fallbackModelUrl}`);
+    modelBuffer = await loadOnnxModelFromUrl(fallbackModelUrl);
   }
 
-  const urlsToTry = [
-    new URL(`models/${modelFilename}`, baseUrl).href,
-    `/models/${modelFilename}`,
-    `./models/${modelFilename}`,
-  ];
-
-  if (typeof window !== 'undefined') {
-     urlsToTry.push(new URL(`models/${modelFilename}`, window.location.href).href);
-     // Try path relative to current page if it's in a subfolder like /app/
-     if (basePath !== '/' && basePath.length > 1 && basePath.startsWith('/')) {
-        // Ensure basePath is correctly formed for URL constructor if it's like /app/
-        const subPath = basePath.endsWith('/') ? basePath : basePath + '/';
-        urlsToTry.push(new URL(`${subPath}models/${modelFilename}`, baseUrl).href);
-     }
-  }
-
-  const uniqueUrls = [...new Set(urlsToTry)];
-  console.log(`Attempting to load ONNX model '${modelFilename}' from the following URLs:`, uniqueUrls);
-
-  for (const url of uniqueUrls) {
+  if (modelBuffer) {
     try {
-      const modelBuffer = await loadOnnxModelFromUrl(url);
-      if (modelBuffer) {
-        const blob = new Blob([modelBuffer], { type: 'application/octet-stream' });
-        const modelBlobUrl = URL.createObjectURL(blob);
-        console.log(`Created ONNX model blob URL from successfully fetched: ${url}`);
-        return modelBlobUrl;
-      }
+      const blob = new Blob([modelBuffer], { type: 'application/octet-stream' });
+      const modelBlobUrl = URL.createObjectURL(blob);
+      console.log(`Created ONNX model blob URL from successfully fetched model.`);
+      return modelBlobUrl;
     } catch (error) {
-      // Error is logged in loadOnnxModelFromUrl, continue to next URL
+      console.error(`Error creating blob URL for model:`, error);
+      // Fall through to return null if blob creation fails
     }
   }
 
-  console.error(`Failed to load ONNX model '${modelFilename}' from any of the attempted URLs.`);
-  return null;
+  // This message will be shown if both local and fallback attempts failed
+  console.error(`Failed to load ONNX model '${modelFilename}'. Tried local URL: ${localModelUrl} and fallback URL: ${fallbackModelUrl}. Please ensure the model is accessible via one of these paths and the 'base' path in 'vite.config.js' is correctly set for your deployment environment if using local path.`);
+  return null; 
 };
 
 export const initializeMnistModel = async () => {
