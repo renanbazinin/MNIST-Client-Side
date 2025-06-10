@@ -467,9 +467,12 @@ function App() {
               id="model-select" 
               value={selectedModel} 
               onChange={(e) => setSelectedModel(e.target.value)}
+              className="model-select"
             >
-              <option value="model.onnx">Standard Model</option>
-              <option value="lightModel.onnx">Light Model</option>
+              <option value="model.onnx">Standard Model - 96% accuracy (1.2M params)</option>
+              <option value="lightModel.onnx">Light Model - if slow</option>
+              <option value="best_model.onnx">Best Model - 98.98% accuracy (25M params)</option>
+              <option value="test.onnx">Test Model - for development</option>
             </select>
           </div>
           {showInitialLoadMessage && (

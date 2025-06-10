@@ -400,38 +400,63 @@ html, body {
 
 /* Model Selector Styles */
 .model-selector {
-  margin-top: 0.75rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #f0f0f0; /* Light text for dark background */
+  color: #f0f0f0;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .model-selector label {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  color: #fff;
 }
 
-.model-selector select {
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #555; /* Darker border */
-  background-color: #444; /* Dark background for select */
-  color: #f0f0f0; /* Light text for select */
+.model-select {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #fff;
   font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 3rem;
 }
 
-.model-selector select:hover {
-  border-color: #777;
+.model-select:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.model-selector select:focus {
+.model-select:focus {
   outline: none;
-  border-color: #667eea; /* Highlight color */
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.model-select option {
+  background-color: #333;
+  color: #fff;
+  padding: 0.75rem;
+  font-weight: 500;
 }
 
 /* Initial Load Notification Styles */
@@ -771,6 +796,19 @@ html, body {
   .main {
     padding: 0.75rem 0.5rem;
     gap: 1.5rem;
+  }
+  
+  /* Model selector mobile styles */
+  .model-selector {
+    max-width: none;
+    margin: 1rem 0 0.75rem 0;
+  }
+  
+  .model-select {
+    font-size: 0.85rem;
+    padding: 0.6rem 2.5rem 0.6rem 0.75rem;
+    background-size: 1.25em 1.25em;
+    background-position: right 0.6rem center;
   }
   
   .canvas-container {
