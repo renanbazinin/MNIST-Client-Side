@@ -471,7 +471,7 @@ function App() {
             >
               <option value="model.onnx">Standard Model - 96% accuracy (1.2M params)</option>
               <option value="lightModel.onnx">Light Model - if slow</option>
-              <option value="best_model.onnx">Best Model - 98.98% accuracy (25M params)</option>
+              <option value="best_model.onnx">Best Model - 98.38% accuracy (25M params)</option>
               <option value="test.onnx">Test Model - for development</option>
             </select>
           </div>
