@@ -89,3 +89,9 @@ The ONNX model (`model.onnx`) should be placed in the `public/models/` directory
 3.  This vector is fed as input to the pre-trained MNIST ONNX model loaded using ONNX Runtime Web.
 4.  The model outputs probabilities for each digit (0-9).
 5.  The application displays the digit with the highest probability as the prediction.
+
+## Autoencoder
+
+🔗 **[Autoencoder Demo](https://renanbazinin.github.io/MNIST-Client-Side/#/encoder)**
+
+A complementary page showcasing a trained autoencoder that learns to compress and reconstruct handwritten digits. Draw a digit on the canvas to see the AI-generated reconstruction in real time. You can switch between different autoencoder models for testing and compare reconstruction quality.
