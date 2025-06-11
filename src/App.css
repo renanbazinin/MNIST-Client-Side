@@ -740,6 +740,60 @@ html, body {
   box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
+/* Autoencoder specific styles */
+.reconstruction-result {
+  margin-top: 1.5rem;
+  width: 100%;
+  max-width: min(400px, calc(100vw - 2rem));
+  box-sizing: border-box;
+}
+
+.reconstruction-card {
+  background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+  border-radius: 20px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.5s ease-out;
+}
+
+.reconstruction-card h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.output-canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.output-canvas {
+  background: #000;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.output-canvas:hover {
+  transform: scale(1.05);
+}
+
+/* Mobile optimizations for autoencoder */
+@media (max-width: 767px) {
+  .reconstruction-card {
+    padding: 1rem;
+    margin: 0 0.5rem;
+  }
+  
+  .output-canvas {
+    width: 120px !important;
+    height: 120px !important;
+  }
+}
+
 /* Responsive Design - Desktop First for larger screens */
 @media (min-width: 768px) {
   .main {

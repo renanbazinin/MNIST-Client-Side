@@ -168,6 +168,11 @@ export const initializeMnistModel = async (modelFilename = 'model.onnx', retries
     }
   }
 };
+// Initialize autoencoder ONNX session
+export const initializeAutoencoderModel = async (modelFilename = 'autoencoder.onnx') => {
+  // reuse same initialize logic
+  return initializeMnistModel(modelFilename);
+};
 
 export const runMnistPrediction = async (session, preprocessedInput) => {
   if (!session) {
