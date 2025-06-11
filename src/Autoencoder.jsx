@@ -14,7 +14,7 @@ function AutoencoderPage() {
   const [lastPosition, setLastPosition] = useState(null);
   const [reconstructionHistory, setReconstructionHistory] = useState([]);  const [showHistory, setShowHistory] = useState(false);  const [showInfo, setShowInfo] = useState(false);
   const [autoReconstructTimer, setAutoReconstructTimer] = useState(null);
-  const [selectedModel, setSelectedModel] = useState('autoencoder2.onnx'); // Default autoencoder model
+  const [selectedModel, setSelectedModel] = useState('autoencoder3.onnx'); // Default autoencoder model
   const [showInitialLoadMessage, setShowInitialLoadMessage] = useState(false);
   const isInitialLoadCycleRef = useRef(true); // Tracks if we are in the initial model load cycle
   // Initialize canvas for drawing
@@ -460,6 +460,8 @@ function AutoencoderPage() {
             >
               <option value="autoencoder.onnx">testing - very bad!</option>
               <option value="autoencoder2.onnx">Advanced Autoencoder - Better quality</option>
+              <option value="autoencoder3.onnx">Most Advanced Autoencoder - best loss</option>
+
             </select>
           </div>
           {showInitialLoadMessage && (
