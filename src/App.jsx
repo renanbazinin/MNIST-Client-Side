@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import './App.css';
 import * as ort from 'onnxruntime-web'; // Kept as ONNX runtime is fundamental
+import { Link } from 'react-router-dom';
 import { initializeMnistModel, runMnistPrediction } from './services/mnistOnnxService';
 
 function App() {
@@ -480,6 +481,11 @@ function App() {
               Initializing AI model for the first time. This may take up to 20 seconds. Please wait...
             </div>
           )}
+          <div style={{ marginTop: '1rem' }}>
+            <Link to="/encoder" className="btn btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex' }}>
+              Go to Autoencoder →
+            </Link>
+          </div>
         </header>
 
         <main className="main">
