@@ -22,6 +22,21 @@ This project was built with React and Vite.
 *   Collapsible sections for "How it works", "Recent Predictions", and "Prediction Logs".
 *   Responsive design.
 
+## Autoencoder
+
+🔗 **[Autoencoder Demo](https://renanbazinin.github.io/MNIST-Client-Side/#/encoder)**
+
+Our autoencoder model not only compresses and reconstructs handwritten digits but also effectively cleans noise from your drawings. This neural network learns to encode the key features of the digit and decode a clear, denoised version.
+
+### Autoencoder in Action
+**Input (what you draw):**  
+![Noisy Input](https://i.imgur.com/zSvrVLz.png)  
+
+**Output (denoised output):**  
+![Denoised Output](https://i.imgur.com/7oOhWwp.png)
+
+Feel free to switch between different autoencoder variations and compare reconstruction quality in the demo.
+
 
 
 
@@ -43,28 +58,3 @@ The ONNX model (`model.onnx`) should be placed in the `public/models/` directory
 4.  The model outputs probabilities for each digit (0-9).
 5.  The application displays the digit with the highest probability as the prediction.
 
-## Autoencoder
-
-🔗 **[Autoencoder Demo](https://renanbazinin.github.io/MNIST-Client-Side/#/encoder)**
-
-Our autoencoder model not only compresses and reconstructs handwritten digits but also effectively cleans noise from your drawings. This neural network learns to encode the key features of the digit and decode a clear, denoised version.
-
-### Autoencoder in Action
-**Input (what you draw):**  
-![Noisy Input](https://i.imgur.com/zSvrVLz.png)  
-
-**Output (denoised output):**  
-![Denoised Output](https://i.imgur.com/7oOhWwp.png)
-
-Feel free to switch between different autoencoder variations and compare reconstruction quality in the demo.
-
-## MNIST Prediction Examples
-Here are some examples showing how the MNIST digit recognition model performs on user-drawn digits:
-
-**Example 1: Digit 4**  
-![Drawn 4](https://i.imgur.com/SVTWjOY.png)  
-_Model Prediction: 4 (97.1% confidence)_
-
-**Example 2: Digit 8**  
-![Drawn 8](https://i.imgur.com/KN4SI34.png)  
-_Model Prediction: 8 (high confidence)_
