@@ -22,6 +22,20 @@ This project was built with React and Vite.
 *   Collapsible sections for "How it works", "Recent Predictions", and "Prediction Logs".
 *   Responsive design.
 
+
+## MNIST Prediction Examples
+Here are some examples showing how the MNIST digit recognition model performs on user-drawn digits:
+
+**Example 1: Digit 4**  
+![Drawn 4](https://i.imgur.com/SVTWjOY.png)  
+_Model Prediction: 4 (97.1% confidence)_
+
+**Example 2: Digit 8**  
+![Drawn 8](https://i.imgur.com/KN4SI34.png)  
+_Model Prediction: 8 (high confidence)_
+
+
+
 ## Autoencoder
 
 🔗 **[Autoencoder Demo](https://renanbazinin.github.io/MNIST-Client-Side/#/encoder)**
