@@ -22,55 +22,8 @@ This project was built with React and Vite.
 *   Collapsible sections for "How it works", "Recent Predictions", and "Prediction Logs".
 *   Responsive design.
 
-## Project Setup
 
-### Prerequisites
 
-*   Node.js and npm (or yarn)
-
-### Installation
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/renanbazinin/MNIST-Client-Side.git
-    cd MNIST-Client-Side
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-    (or `yarn install`)
-
-## Available Scripts
-
-### Running the Development Server
-
-To start the Vite development server:
-
-```bash
-npm run dev
-```
-
-This will typically open the application at `http://localhost:5173`.
-
-### Building for Production
-
-To create a production build in the `dist` folder:
-
-```bash
-npm run build
-```
-
-### Deploying to GitHub Pages
-
-The project is configured for easy deployment to GitHub Pages.
-
-1.  Ensure your `vite.config.js` has the correct `base` path (e.g., `/MNIST-Client-Side/`).
-2.  Run the deploy script:
-    ```bash
-    npm run deploy
-    ```
-    This script will first build the project and then push the `dist` directory to the `gh-pages` branch of your repository.
 
 ## Model
 
@@ -94,4 +47,24 @@ The ONNX model (`model.onnx`) should be placed in the `public/models/` directory
 
 🔗 **[Autoencoder Demo](https://renanbazinin.github.io/MNIST-Client-Side/#/encoder)**
 
-A complementary page showcasing a trained autoencoder that learns to compress and reconstruct handwritten digits. Draw a digit on the canvas to see the AI-generated reconstruction in real time. You can switch between different autoencoder models for testing and compare reconstruction quality.
+Our autoencoder model not only compresses and reconstructs handwritten digits but also effectively cleans noise from your drawings. This neural network learns to encode the key features of the digit and decode a clear, denoised version.
+
+### Autoencoder in Action
+**Input (what you draw):**  
+![Noisy Input](https://i.imgur.com/zSvrVLz.png)  
+
+**Output (denoised output):**  
+![Denoised Output](https://i.imgur.com/7oOhWwp.png)
+
+Feel free to switch between different autoencoder variations and compare reconstruction quality in the demo.
+
+## MNIST Prediction Examples
+Here are some examples showing how the MNIST digit recognition model performs on user-drawn digits:
+
+**Example 1: Digit 4**  
+![Drawn 4](https://i.imgur.com/SVTWjOY.png)  
+_Model Prediction: 4 (97.1% confidence)_
+
+**Example 2: Digit 8**  
+![Drawn 8](https://i.imgur.com/KN4SI34.png)  
+_Model Prediction: 8 (high confidence)_
